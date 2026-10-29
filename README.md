@@ -9,6 +9,14 @@ Complete, production-ready **OpenCore 1.0.8 EFI** and installation guide for the
 
 ---
 
+## 📚 Documentation & Guides
+
+* **[Complete Installation Guide](INSTRUCTIONS.md)**: Full step-by-step walkthrough from USB creation to desktop setup.
+* **[USB Boot & BIOS Password Troubleshooting Guide](docs/USB_BOOT_GUIDE.md)**: Having trouble booting the USB or locked by a BIOS password? Read this comprehensive guide!
+* **[Latest GitHub Releases (v1.0.0)](https://github.com/daddyc00l69/Honor-MagicBook-WhateverXe-Hackintosh/releases)**: Single-click pre-built ZIP downloads.
+
+---
+
 ## 💻 Hardware Specifications & Support Status
 
 | Component | Hardware Details | ACPI / Kext Implementation | Status |
@@ -68,105 +76,26 @@ Before booting into OpenCore, press **`F2`** repeatedly upon powering on to ente
 * **AHCI SATA Mode**
 * **DVMT Pre-Allocated**: Set to **96 MB** (or 64 MB minimum; `-igfxdvmt` is already active in boot-args to handle fixed 60MB allocations).
 
----
-
-## 📖 Complete Step-by-Step Installation Guide
-
-### Phase 1: Create the Bootable USB Drive
-
-#### Option A: Using Windows
-1. Download the official macOS recovery files using [OpenCore's macrecovery tool](https://dortania.github.io/OpenCore-Install-Guide/installer-guide/windows-install.html#downloading-macos):
-   ```powershell
-   python macrecovery.py -b Mac-A61BCE1180A2E708 -m 00000000000000000 download
-   ```
-   *(Or download a full macOS Sonoma / Sequoia installer using Rufus or gibMacOS).*
-2. Format a 16GB+ USB flash drive:
-   * File System: **FAT32**
-   * Partition Scheme: **GPT** (GUID Partition Table)
-3. Download the pre-built EFI from the [Releases](https://github.com/daddyc00l69/Honor-MagicBook-WhateverXe-Hackintosh/releases) page.
-4. Extract the ZIP file and copy the **`EFI`** folder directly to the root of your USB drive:
-   ```
-   USB Root (X:\)
-   ├── com.apple.recovery.boot/ (macOS Installer files)
-   └── EFI/
-       ├── BOOT/
-       │   └── BOOTx64.efi
-       └── OC/
-           ├── ACPI/
-           ├── Drivers/
-           ├── Kexts/
-           ├── Tools/
-           ├── OpenCore.efi
-           └── config.plist
-   ```
+*(If your BIOS has an unknown password or Secure Boot cannot be disabled directly, refer to the [USB Boot & BIOS Guide](docs/USB_BOOT_GUIDE.md)).*
 
 ---
 
-### Phase 2: Installing macOS
+## 🚀 Installation Overview
 
-1. Plug the USB into a USB 3.0 / USB-C port on your MagicBook.
-2. Power on the laptop and immediately tap **`F12`** (or `Fn + F12`) to access the BIOS Boot Selection Menu.
-3. Select your USB drive (UEFI Boot).
-4. In the OpenCore Boot Picker:
-   * Choose **Install macOS Sonoma / Sequoia (External)**.
-5. The system will boot with verbose logs (`-v`). Wait until the **macOS Recovery** environment appears.
-6. Open **Disk Utility**:
-   * Click **View** (top left) ➔ **Show All Devices**.
-   * Select your target internal SSD (or a dedicated partition).
-   * Click **Erase**:
-     * **Name:** `Macintosh HD`
-     * **Format:** `APFS`
-     * **Scheme:** `GUID Partition Map`
-   * Close Disk Utility.
-7. Select **Install macOS** and follow the on-screen prompts.
-8. **Automated Reboots:** The laptop will restart 2 to 3 times during installation. Every time it restarts:
-   * Press `F12` to boot back into the USB.
-   * In the OpenCore picker, select **macOS Installer** (or **Macintosh HD** once installation finishes).
-9. Complete the macOS initial setup assistant (create your user account, disable Analytics, setup language/keyboard).
-
----
-
-### Phase 3: Post-Installation (Internal Boot & Graphics Acceleration)
-
-#### 1. Make the Laptop Boot Without the USB
-1. In macOS, download and open **[MountEFI](https://github.com/corpnewt/MountEFI)** or **OpenCore Configurator**.
-2. Mount the EFI partition of your **USB drive** and the EFI partition of your **internal NVMe SSD**.
-3. Copy the entire **`EFI`** folder from the USB drive to the EFI partition of your internal SSD.
-4. Unplug the USB drive. Your MagicBook will now boot directly into macOS!
-
-#### 2. Connect to Wi-Fi
-1. Open the [HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases) application.
-2. HeliPort will appear in your top menu bar, interfacing with `itlwm.kext`.
-3. Select your Wi-Fi network and enter your password.
-
-#### 3. Enable WhateverXe Hardware Graphics Acceleration
-1. Download **`WhateverXe-Graphics-0.3.2.pkg`** from the [WhateverXe-Graphics Releases page](https://github.com/b00t0x/WhateverXe-Graphics/releases).
-2. Double-click the `.pkg` file to open it with the macOS Installer.
-3. Follow the on-screen prompts to complete the installation.
-   * *This writes the adapted Intel Xe graphics driver stack into `/Library` and rebuilds the macOS Auxiliary Kernel Collection (`AuxKC`).*
-4. **Restart your laptop.**
-5. Verify acceleration:
-   * Go to ** Apple Menu** ➔ **About This Mac**.
-   * Your graphics should report **Intel UHD Graphics / Iris Xe Graphics** with full VRAM (1536 MB+) and smooth GUI transparency/dock blur.
-
----
-
-## 🔍 Display & Troubleshooting Matrix
-
-| Issue | Cause | Solution |
-| :--- | :--- | :--- |
-| **Black screen after installing Graphics .pkg** | eDP internal panel link training failure | Connect an external monitor via HDMI. If external monitor displays the desktop, your panel uses a non-standard backlight path. You can temporarily boot with boot-arg `-wex-adlp-load-only` to disable GPU probe while retaining standard framebuffer. |
-| **Kernel Panic at `[EB\|#LOG:EXITBS:START]`** | Incorrect Booter Quirks | Ensure `ProvideCurrentCpuInfo = True`, `DevirtualiseMmio = True`, and `RebuildAppleMemoryMap = True` in `config.plist`. |
-| **Trackpad does not move in Installer** | I2C GPIO interrupt timing | Use an external USB mouse during installation. Once macOS is installed, the trackpad operates natively via `VoodooI2C` + `VoodooI2CHID`. |
-| **No Sound / Audio output** | Wrong ALC256 layout ID | Boot argument `alcid=11` is default. Alternative valid layout IDs for ALC256 include `13`, `21`, `28`, or `66`. Change in `boot-args` if needed. |
+1. **Format USB as MBR FAT32** using Rufus or Diskpart.
+2. Copy the **`EFI`** folder to the root of the USB drive.
+3. Boot via **`F12`** Boot Menu or Windows **Shift + Restart ➔ Use a device**.
+4. Install macOS Sonoma / Sequoia.
+5. In macOS, install **`WhateverXe-Graphics-0.3.2.pkg`** from [Releases](https://github.com/b00t0x/WhateverXe-Graphics/releases) to activate Metal & hardware graphics acceleration.
+6. Open **HeliPort** for Wi-Fi.
 
 ---
 
 ## 👏 Credits & Acknowledgments
 
-* **[b00t0x](https://github.com/b00t0x)** for the groundbreaking [WhateverXe](https://github.com/b00t0x/WhateverXe), [WhateverXe-Graphics](https://github.com/b00t0x/WhateverXe-Graphics), and [CpuTopologyRebuild](https://github.com/b00t0x/CpuTopologyRebuild).
+* **[b00t0x](https://github.com/b00t0x)** for [WhateverXe](https://github.com/b00t0x/WhateverXe), [WhateverXe-Graphics](https://github.com/b00t0x/WhateverXe-Graphics), and [CpuTopologyRebuild](https://github.com/b00t0x/CpuTopologyRebuild).
 * **[Acidanthera](https://github.com/acidanthera)** for OpenCore Bootloader, Lilu, VirtualSMC, AppleALC, VoodooPS2, NVMeFix, and BrcmPatchRAM.
 * **[OpenIntelWireless](https://github.com/OpenIntelWireless)** for `itlwm`, `IntelBluetoothFirmware`, and `HeliPort`.
 * **[VoodooI2C Team](https://github.com/VoodooI2C/VoodooI2C)** for precision multi-touch trackpad drivers.
 * **[CorpNewt](https://github.com/corpnewt)** for SSDTTime and MountEFI.
-* **[Dortania](https://dortania.github.io/)** for the industry standard OpenCore documentation.
+* **[Dortania](https://dortania.github.io/)** for OpenCore documentation.

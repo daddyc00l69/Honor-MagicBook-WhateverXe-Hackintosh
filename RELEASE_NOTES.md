@@ -36,3 +36,4 @@ Initial validated release of the OpenCore 1.0.8 EFI tailored specifically for th
 Download **`EFI-Honor-MagicBook-WhateverXe.zip`** below, extract it, and copy the `EFI` folder to the root of your FAT32 formatted USB drive.
 
 Refer to the repository's [README.md](https://github.com/daddyc00l69/Honor-MagicBook-WhateverXe-Hackintosh/blob/main/README.md) and [INSTRUCTIONS.md](https://github.com/daddyc00l69/Honor-MagicBook-WhateverXe-Hackintosh/blob/main/INSTRUCTIONS.md) for full step-by-step setup guidance.
+

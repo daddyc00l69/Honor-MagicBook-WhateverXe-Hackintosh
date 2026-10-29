@@ -106,3 +106,4 @@ Once you are at the macOS desktop:
   * *A:* Plug in an external monitor via HDMI. If the desktop appears on HDMI, your internal laptop screen panel uses an unsupported backlight power sequence. You can boot with boot-arg `-wex-adlp-load-only` to disable the acceleration probe and keep standard framebuffer until an update is available.
 * **Q: No sound from speakers.**
   * *A:* Open `config.plist` with ProperTree or OpenCore Configurator. Find `NVRAM -> Add -> 7C436110-AB2A-4BBB-A880-FE41995C9F82 -> boot-args`. Change `alcid=11` to `alcid=13` or `alcid=21`, save, and reboot.
+
